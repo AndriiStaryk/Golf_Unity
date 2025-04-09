@@ -3,6 +3,10 @@ using UnityEngine;
 public class GolfCourseGenerator : MonoBehaviour
 {
     public Terrain terrain;
+    public GameObject holePrefab;
+    public GameObject flagPrefab;
+    public GameObject treePrefab;
+
     public int width = 512;
     public int height = 512;
     public float scale = 20f;
@@ -10,9 +14,9 @@ public class GolfCourseGenerator : MonoBehaviour
     void Start()
     {
         GenerateTerrain();
-        CreateHole();
+        CreateHoleWithFlag();
         GenerateTrees();
-        GenerateFairway();
+        //GenerateFairway();
     }
 
     void GenerateTerrain()
@@ -34,12 +38,20 @@ public class GolfCourseGenerator : MonoBehaviour
         terrainData.SetHeights(0, 0, heights);
     }
 
-    void CreateHole()
+    void CreateHoleWithFlag()
     {
-        GameObject hole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        hole.transform.position = new Vector3(width / 2, 0, height / 2);
-        hole.transform.localScale = new Vector3(1f, 0.1f, 1f);
-        hole.GetComponent<Renderer>().material.color = Color.black;
+        Vector3 holePosition = new Vector3(width / 2, 0, height / 2);
+
+        // Instantiate the hole prefab at the ground level
+        GameObject hole = Instantiate(holePrefab, holePosition, Quaternion.identity);
+
+        // Adjust the hole position to sit on the terrain
+        float holeHeight = terrain.SampleHeight(holePosition);
+        hole.transform.position = new Vector3(holePosition.x, holeHeight, holePosition.z);
+
+        // Instantiate the flag prefab slightly above the hole
+        Vector3 flagPosition = holePosition + new Vector3(0, 3f, 0);
+        GameObject flag = Instantiate(flagPrefab, flagPosition, Quaternion.identity);
     }
 
     void GenerateTrees()
@@ -47,35 +59,32 @@ public class GolfCourseGenerator : MonoBehaviour
         for (int i = 0; i < 20; i++)
         {
             Vector3 position = new Vector3(Random.Range(0, width), 0, Random.Range(0, height));
-            GameObject tree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            tree.transform.position = position;
-            tree.transform.localScale = new Vector3(2f, 10f, 2f);
-            tree.GetComponent<Renderer>().material.color = Color.green;
+            Instantiate(treePrefab, position, Quaternion.identity);
         }
     }
 
-    void GenerateFairway()
-    {
-        TerrainData terrainData = terrain.terrainData;
-        float[,] heights = terrainData.GetHeights(0, 0, width, height);
+    // void GenerateFairway()
+    // {
+    //     TerrainData terrainData = terrain.terrainData;
+    //     float[,] heights = terrainData.GetHeights(0, 0, width, height);
 
-        int startX = 10;
-        int startY = 10;
-        int endX = width / 2;
-        int endY = height / 2;
-        int fairwayWidth = 20;
+    //     int startX = 10;
+    //     int startY = 10;
+    //     int endX = width / 2;
+    //     int endY = height / 2;
+    //     int fairwayWidth = 20;
 
-        for (int x = startX; x < endX; x++)
-        {
-            for (int y = startY; y < endY; y++)
-            {
-                if (Mathf.Abs(x - startX) < fairwayWidth || Mathf.Abs(y - startY) < fairwayWidth)
-                {
-                    heights[x, y] = 0.02f;
-                }
-            }
-        }
+    //     for (int x = startX; x < endX; x++)
+    //     {
+    //         for (int y = startY; y < endY; y++)
+    //         {
+    //             if (Mathf.Abs(x - startX) < fairwayWidth || Mathf.Abs(y - startY) < fairwayWidth)
+    //             {
+    //                 heights[x, y] = 0.02f;
+    //             }
+    //         }
+    //     }
 
-        terrainData.SetHeights(0, 0, heights);
-    }
+    //     terrainData.SetHeights(0, 0, heights);
+    // }
 }
