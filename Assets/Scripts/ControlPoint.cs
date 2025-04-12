@@ -2,24 +2,21 @@ using UnityEngine;
 
 public class ControlPoint : MonoBehaviour
 {
-    private float xRot = 0f;  
-    private float yRot = 0f;  
-    
-    private float aimXRot = 0f;
-    private float aimYRot = 0f;
-
     public Rigidbody ball;
-    public LineRenderer line;
+    public LineRenderer aimLine;
     public Transform cameraHolder;
     public Vector3 cameraOffset = new Vector3(0, 2.5f, -9);
     public float rotationSpeed = 5f;
     public float shootPower = 30f;
-
+    private float xRot = 0f;  
+    private float yRot = 0f;  
+    private float aimXRot = 0f;
+    private float aimYRot = 0f;
     private const float MinPower = 5f;
     private const float MaxPower = 75f;
     private const float MinPitch = -15f;
     private const float MaxPitch = 83f;
-
+    private const float MaxAimLineLength = 14f;
     private float currentPower;
     private Transform aimPoint;
 
@@ -94,16 +91,16 @@ public class ControlPoint : MonoBehaviour
     private void UpdateLineRenderer()
     {
         Vector3 direction = aimPoint.forward;
-        line.gameObject.SetActive(true);
-        line.SetPosition(0, transform.position);
-        line.SetPosition(1, transform.position + direction * (currentPower / MaxPower) * 8f);
+        aimLine.gameObject.SetActive(true);
+        aimLine.SetPosition(0, transform.position);
+        aimLine.SetPosition(1, transform.position + direction * (currentPower / MaxPower) * MaxAimLineLength);
     }
 
     private void ShootBall()
     {
         Vector3 shotDirection = aimPoint.forward;
         ball.linearVelocity = shotDirection * currentPower;
-        line.gameObject.SetActive(false);
+        aimLine.gameObject.SetActive(false);
         currentPower = MinPower;
     }
 
@@ -111,6 +108,6 @@ public class ControlPoint : MonoBehaviour
     {
         aimYRot = yRot;
         currentPower = MinPower;
-        line.gameObject.SetActive(false);
+        aimLine.gameObject.SetActive(false);
     }
 }
