@@ -426,10 +426,16 @@ MonoBehaviour:
   terrain: {fileID: 426776890}
   holePrefab: {fileID: 6816056442486443003, guid: b09fd2d6c38fb094eae839f18b86d6aa, type: 3}
   flagPrefab: {fileID: 7781694632239783106, guid: e448e9faae8ece64a9bbcc9316df9ec2, type: 3}
-  treePrefab: {fileID: 4379200370410572894, guid: 804e97282c2deb5488a0aec2e411b50c, type: 3}
+  treePrefabs:
+  - {fileID: 2222111361404534124, guid: 88f2fd29f58b9734683512546acec310, type: 3}
+  - {fileID: 4661435515762455780, guid: e289bf5debb17f6459818c207d781953, type: 3}
+  - {fileID: 6941765000743290380, guid: c60edd51c065ceb46b345849a03bc106, type: 3}
+  - {fileID: 2807449429036958551, guid: f0c16f0ea935ea64297ca1d4d55d9746, type: 3}
+  - {fileID: 9069115365609291303, guid: 60f79905accf3b24fa0114b941f1aac0, type: 3}
   width: 512
   height: 512
   scale: 20
+  treesCount: 1200
 --- !u!154 &426776889
 TerrainCollider:
   m_ObjectHideFlags: 0
@@ -832,8 +838,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ball: {fileID: 1855376155}
-  line: {fileID: 1629533753}
-  powerBar: {fileID: 0}
+  aimLine: {fileID: 1629533753}
+  cameraHolder: {fileID: 435144780}
+  cameraOffset: {x: 0, y: 2.5, z: -9}
   rotationSpeed: 2
   shootPower: 30
 --- !u!4 &1269695787
