@@ -9,8 +9,8 @@ public class ControlPoint : MonoBehaviour
     public Vector3 cameraOffset = new Vector3(0, 2.5f, -9);
     public float rotationSpeed = 5f;
     public float shootPower = 30f;
-    private float xRot = 0f;  
-    private float yRot = 0f;  
+    private float xRot = 0f;
+    private float yRot = 0f;
     private float aimXRot = 0f;
     private float aimYRot = 0f;
     private const float MinPower = 5f;
@@ -25,7 +25,7 @@ public class ControlPoint : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         currentPower = MinPower;
-        
+
         aimPoint = new GameObject("AimPoint").transform;
         aimPoint.SetParent(transform);
         aimPoint.localPosition = Vector3.zero;
@@ -41,7 +41,7 @@ public class ControlPoint : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             IncreasePower();
-            UpdateLineRenderer();
+            //UpdateLineRenderer();
         }
 
         if (Input.GetMouseButtonUp(0))
@@ -56,22 +56,30 @@ public class ControlPoint : MonoBehaviour
         }
     }
 
+    void LateUpdate()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            UpdateLineRenderer();
+        }
+    }
+
     private void UpdateRotation()
     {
         xRot += Input.GetAxis("Mouse X") * rotationSpeed;
-        yRot += Input.GetAxis("Mouse Y") * rotationSpeed * 0.5f; 
-        
+        yRot += Input.GetAxis("Mouse Y") * rotationSpeed * 0.5f;
+
         aimXRot = xRot;
         aimYRot += Input.GetAxis("Mouse Y") * rotationSpeed;
 
         xRot += ((Input.GetKey(KeyCode.A) ? -0.5f : 0f) + (Input.GetKey(KeyCode.D) ? 0.5f : 0f));
-        yRot -= ((Input.GetKey(KeyCode.W) ? 0.25f : 0f) + (Input.GetKey(KeyCode.S) ? -0.25f : 0f)); 
-        
+        yRot -= ((Input.GetKey(KeyCode.W) ? 0.25f : 0f) + (Input.GetKey(KeyCode.S) ? -0.25f : 0f));
+
         aimXRot += ((Input.GetKey(KeyCode.A) ? -0.5f : 0f) + (Input.GetKey(KeyCode.D) ? 0.5f : 0f));
         aimYRot -= ((Input.GetKey(KeyCode.W) ? 0.5f : 0f) + (Input.GetKey(KeyCode.S) ? -0.5f : 0f));
 
-        yRot = Mathf.Clamp(yRot, MinPitch * 0.5f, MaxPitch * 0.5f); 
-        aimYRot = Mathf.Clamp(aimYRot, MinPitch, MaxPitch); 
+        yRot = Mathf.Clamp(yRot, MinPitch * 0.5f, MaxPitch * 0.5f);
+        aimYRot = Mathf.Clamp(aimYRot, MinPitch, MaxPitch);
 
         if (cameraHolder != null)
         {
