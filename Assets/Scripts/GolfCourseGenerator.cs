@@ -48,27 +48,33 @@ public class GolfCourseGenerator : MonoBehaviour
         terrainData.SetHeights(0, 0, heights);
     }
     
+
     void CreateHoleWithFlag()
-    {
-        Vector3 holePosition = new Vector3(width / 2, 0, height / 2);
-        
-        holePosition = terrain.transform.position + new Vector3(
-            holePosition.x, 
-            0, 
-            holePosition.z
-        );
-        
-        float holeHeight = terrain.SampleHeight(holePosition);
-        holePosition.y = holeHeight;
-        
-        GameObject hole = Instantiate(holePrefab, holePosition, Quaternion.identity);
-
-        Vector3 flagPosition = holePosition + new Vector3(0, 3f, 0);
-        GameObject flag = Instantiate(flagPrefab, flagPosition, Quaternion.identity);
-    }
+{
+    Vector3 holePosition = new Vector3(width / 2, 0, height / 2);
+    holePosition = terrain.transform.position + new Vector3(holePosition.x, 0, holePosition.z);
     
+    float holeHeight = terrain.SampleHeight(holePosition);
+    holePosition.y = holeHeight;
 
-    
+    GameObject hole = Instantiate(holePrefab, holePosition, Quaternion.identity);
+
+    // Create the trigger detection zone
+    GameObject triggerZone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+    triggerZone.transform.position = holePosition + new Vector3(0, -0.2f, 0);
+    triggerZone.transform.localScale = new Vector3(0.6f, 0.1f, 0.6f);
+    triggerZone.GetComponent<Renderer>().enabled = false; // Hide it
+    triggerZone.GetComponent<Collider>().isTrigger = true;
+    triggerZone.name = "HoleTrigger";
+    triggerZone.transform.parent = hole.transform;
+
+    // Add HoleSink script
+    triggerZone.AddComponent<HoleSink>();
+
+    // Place flag above the hole
+    Vector3 flagPosition = holePosition + new Vector3(0, 3f, 0);
+    Instantiate(flagPrefab, flagPosition, Quaternion.identity);
+}
     void GenerateTrees()
     {
         for (int i = 0; i < treesCount; i++)

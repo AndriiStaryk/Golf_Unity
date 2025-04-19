@@ -3,6 +3,13 @@ using TMPro;
 
 public class GameHUD : MonoBehaviour
 {
+public static GameHUD Instance { get; private set; }
+
+void Awake()
+{
+    Instance = this;
+}
+
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI shotsText;
 

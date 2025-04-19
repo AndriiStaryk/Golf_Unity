@@ -6,7 +6,6 @@ public class ControlPoint : MonoBehaviour
     public Rigidbody ball;
     public LineRenderer aimLine;
     public Transform cameraHolder;
-    public GameHUD gameHUD;
     public Vector3 cameraOffset = new Vector3(0, 2.5f, -9);
     public float rotationSpeed = 5f;
     public float shootPower = 30f;
@@ -14,7 +13,6 @@ public class ControlPoint : MonoBehaviour
     private float yRot = 0f;  
     private float aimXRot = 0f;
     private float aimYRot = 0f;
-    private int shotsUsed = 0;
     private const float MinPower = 5f;
     private const float MaxPower = 75f;
     private const float MinPitch = -15f;
@@ -103,7 +101,7 @@ public class ControlPoint : MonoBehaviour
     {
         Vector3 shotDirection = aimPoint.forward;
         ball.linearVelocity = shotDirection * currentPower;
-        gameHUD.AddShot();
+        GameHUD.Instance.AddShot();
         aimLine.gameObject.SetActive(false);
         currentPower = MinPower;
     }
