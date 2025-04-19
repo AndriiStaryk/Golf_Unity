@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class GolfBall : MonoBehaviour
 {
+    public GameHUD gameHUD;
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Hole"))
@@ -15,14 +16,13 @@ public class GolfBall : MonoBehaviour
     {
         // Display a message or UI
         Debug.Log("Congratulations! You scored!");
-        
         // Restart the game after a delay
         Invoke("RestartGame", 2f);
     }
 
     void RestartGame()
     {
-        // You can reload the scene or reset the ball position
+        gameHUD.ResetGame();
         UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 }
