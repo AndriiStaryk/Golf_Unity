@@ -349,7 +349,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 435144780}
-  speed: 15
+  positionSpeed: 15
+  rotationSpeed: 15
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -511,10 +512,15 @@ MonoBehaviour:
   - {fileID: 6941765000743290380, guid: c60edd51c065ceb46b345849a03bc106, type: 3}
   - {fileID: 2807449429036958551, guid: f0c16f0ea935ea64297ca1d4d55d9746, type: 3}
   - {fileID: 9069115365609291303, guid: 60f79905accf3b24fa0114b941f1aac0, type: 3}
+  skyIndicatorPrefab: {fileID: 0}
   width: 512
   height: 512
   scale: 20
   treesCount: 1200
+  minDistanceFromCenter: 0.2
+  maxDistanceFromCenter: 0.4
+  skyIndicatorHeight: 100
+  skyIndicatorColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!154 &426776889
 TerrainCollider:
   m_ObjectHideFlags: 0
@@ -1056,10 +1062,10 @@ MonoBehaviour:
   ball: {fileID: 1855376155}
   aimLine: {fileID: 1629533753}
   cameraHolder: {fileID: 435144780}
-  gameHUD: {fileID: 1269695788}
   cameraOffset: {x: 0, y: 2.5, z: -9}
   rotationSpeed: 2
   shootPower: 30
+  ballStoppedThreshold: 1
 --- !u!4 &1269695787
 Transform:
   m_ObjectHideFlags: 0
@@ -1138,7 +1144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -1354,10 +1360,9 @@ GameObject:
   - component: {fileID: 1855376157}
   - component: {fileID: 1855376156}
   - component: {fileID: 1855376155}
-  - component: {fileID: 1855376160}
   m_Layer: 0
   m_Name: GolfBall
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1386,9 +1391,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 80
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!135 &1855376156
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1478,19 +1483,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1855376160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1855376154}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef6cae3645a248449ab473ae70c75bbf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameHUD: {fileID: 1269695788}
 --- !u!1 &1891362603
 GameObject:
   m_ObjectHideFlags: 0
@@ -1525,7 +1517,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -308, y: -180}
+  m_AnchoredPosition: {x: -289, y: -180}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1891362605

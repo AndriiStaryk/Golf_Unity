@@ -3,12 +3,15 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
-
-    public float speed = 15f;
+    public float positionSpeed = 15f;
+    public float rotationSpeed = 15f;
 
     private void LateUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, target.position, speed * Time.deltaTime);
-        transform.rotation = Quaternion.Lerp(transform.rotation, target.rotation, speed * Time.deltaTime);
+        if (target == null)
+            return;
+            
+        transform.position = Vector3.Lerp(transform.position, target.position, positionSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.Lerp(transform.rotation, target.rotation, rotationSpeed * Time.deltaTime);
     }
 }

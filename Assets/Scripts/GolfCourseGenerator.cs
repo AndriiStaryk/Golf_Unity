@@ -105,11 +105,6 @@ public class GolfCourseGenerator : MonoBehaviour
 
         triggerZone.AddComponent<HoleSink>();
 
-        // Place flag above the hole
-        Vector3 flagPosition = holePosition + new Vector3(0, 3f, 0);
-        GameObject flag = Instantiate(flagPrefab, flagPosition, Quaternion.identity);
-        flag.transform.parent = hole.transform;
-
         CreateSkyIndicator(holePosition);
     }
 
