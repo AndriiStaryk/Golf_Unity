@@ -13,6 +13,17 @@ public class GolfCourseGenerator : MonoBehaviour
     public float scale = 20f;
 
     public int treesCount = 1200;
+    public float treeHeightMultiplier = 1.5f; 
+
+    // Mountain range settings
+    public bool createMountainBoundary = true;
+    public float mountainHeight = 0.8f; // How tall the mountains are (0-1)
+    public float mountainWidth = 30f;   // How wide the mountain boundary is
+    public float mountainRoughness = 12f; // Controls how jagged the mountains are
+    
+    // Out of bounds settings
+    public bool checkOutOfBounds = true;
+    public float outOfBoundsY = -5f;    // Y level that triggers reset
 
     // Controls for hole placement
     [Range(0.15f, 0.35f)]
@@ -34,20 +45,23 @@ public class GolfCourseGenerator : MonoBehaviour
         GenerateTerrain();
         CreateHoleWithFlag();
         GenerateTrees();
+        
+        if (checkOutOfBounds)
+        {
+            CreateOutOfBoundsDetector();
+        }
     }
 
     void GenerateTerrain()
     {
         TerrainData terrainData = terrain.terrainData;
-
         Vector3 originalSize = terrainData.size;
-
         terrainData.heightmapResolution = width + 1;
-
         terrainData.size = new Vector3(originalSize.x, 50, originalSize.z);
 
         float[,] heights = new float[width, height];
 
+        // Base terrain - gentle hills using Perlin noise
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -56,12 +70,39 @@ public class GolfCourseGenerator : MonoBehaviour
             }
         }
 
+        // Add mountain range around edges if enabled
+        if (createMountainBoundary)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    // Calculate distance from edge
+                    float distFromEdgeX = Mathf.Min(x, width - 1 - x);
+                    float distFromEdgeZ = Mathf.Min(y, height - 1 - y);
+                    float distFromEdge = Mathf.Min(distFromEdgeX, distFromEdgeZ);
+                    
+                    if (distFromEdge < mountainWidth)
+                    {
+                        // Mountain influence decreases as we move away from edge
+                        float influence = 1 - (distFromEdge / mountainWidth);
+                        
+                        // Add some variation to mountain height
+                        float noise = Mathf.PerlinNoise(x / mountainRoughness, y / mountainRoughness);
+                        float mountainInfluence = mountainHeight * influence * (0.8f + 0.4f * noise);
+                        
+                        // Combine with existing height
+                        heights[x, y] = Mathf.Max(heights[x, y], mountainInfluence);
+                    }
+                }
+            }
+        }
+
         terrainData.SetHeights(0, 0, heights);
     }
 
     void CreateHoleWithFlag()
     {
-        
         float centerX = width / 2;
         float centerZ = height / 2;
 
@@ -82,7 +123,6 @@ public class GolfCourseGenerator : MonoBehaviour
 
         // Convert to world position
         Vector3 holePosition = terrain.transform.position + new Vector3(holeX, 0, holeZ);
-
 
         RaycastHit hit;
         if (Physics.Raycast(holePosition + Vector3.up * 100, Vector3.down, out hit, 1000f) &&
@@ -170,10 +210,24 @@ public class GolfCourseGenerator : MonoBehaviour
                 GameObject tree = Instantiate(selectedPrefab, hit.point,
                     Quaternion.Euler(0, Random.Range(0, 360), 0));
 
-                // Apply small random scale variation
-                float scaleVar = Random.Range(0.8f, 1.2f);
-                tree.transform.localScale *= scaleVar;
+                // Apply small random scale variation with increased height
+                float widthScale = Random.Range(0.8f, 1.2f);
+                float heightScale = Random.Range(0.9f, 1.3f) * treeHeightMultiplier;
+                
+                // Apply different scale factors to x, y, and z
+                tree.transform.localScale = new Vector3(
+                    tree.transform.localScale.x * widthScale,
+                    tree.transform.localScale.y * heightScale, 
+                    tree.transform.localScale.z * widthScale
+                );
             }
         }
+    }
+    
+    void CreateOutOfBoundsDetector()
+    {
+        GameObject detector = new GameObject("OutOfBoundsDetector");
+        OutOfBoundsReset resetScript = detector.AddComponent<OutOfBoundsReset>();
+        resetScript.minYPosition = outOfBoundsY;
     }
 }

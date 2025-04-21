@@ -517,6 +517,13 @@ MonoBehaviour:
   height: 512
   scale: 20
   treesCount: 1200
+  treeHeightMultiplier: 1.25
+  createMountainBoundary: 1
+  mountainHeight: 0.8
+  mountainWidth: 30
+  mountainRoughness: 12
+  checkOutOfBounds: 1
+  outOfBoundsY: -5
   minDistanceFromCenter: 0.2
   maxDistanceFromCenter: 0.4
   skyIndicatorHeight: 100
