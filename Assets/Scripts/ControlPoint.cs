@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class ControlPoint : MonoBehaviour
 {
@@ -8,8 +10,14 @@ public class ControlPoint : MonoBehaviour
     public Transform cameraHolder;
     public Vector3 cameraOffset = new Vector3(0, 2.5f, -9);
     public float rotationSpeed = 5f;
+    public float gamepadRotationSpeed = 320f;
     public float shootPower = 30f;
-    public float ballStoppedThreshold = 0.1f; 
+
+    public float isBallMovingThreshold = 1f;
+    
+    // Gamepad settings
+    public float gamepadSensitivity = 40f;
+    public float gamepadPowerIncreaseSpeed = 15f;
     
     private float xRot = 0f;
     private float yRot = 0f;
@@ -22,7 +30,44 @@ public class ControlPoint : MonoBehaviour
     private const float MaxAimLineLength = 14f;
     private float currentPower;
     private Transform aimPoint;
-    private bool isBallMoving = false;
+    private bool isAiming = false;
+
+    // Input System variables
+    private GameControls controls;
+    private Vector2 moveInput;
+    private Vector2 lookInput;
+    private bool aimPressed;
+    private bool shootReleased;
+    private bool cancelPressed;
+
+    void Awake()
+    {
+        // Initialize Input Actions
+        controls = new GameControls();
+        
+        // Set up callbacks for input actions
+        controls.Gameplay.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        controls.Gameplay.Move.canceled += ctx => moveInput = Vector2.zero;
+        
+        controls.Gameplay.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
+        controls.Gameplay.Look.canceled += ctx => lookInput = Vector2.zero;
+        
+        controls.Gameplay.Aim.performed += ctx => aimPressed = true;
+        controls.Gameplay.Aim.canceled += ctx => { aimPressed = false; shootReleased = true; };
+        
+        controls.Gameplay.Cancel.performed += ctx => cancelPressed = true;
+        controls.Gameplay.Cancel.canceled += ctx => cancelPressed = false;
+    }
+
+    void OnEnable()
+    {
+        controls.Gameplay.Enable();
+    }
+
+    void OnDisable()
+    {
+        controls.Gameplay.Disable();
+    }
 
     void Start()
     {
@@ -38,80 +83,102 @@ public class ControlPoint : MonoBehaviour
     void Update()
     {
         transform.position = ball.position;
+
+        UpdateInputs();
         
-        isBallMoving = ball.linearVelocity.magnitude > ballStoppedThreshold;
-        
-        UpdateRotation();
+        // Only show aim line when aiming
+        aimLine.gameObject.SetActive(isAiming);
 
-        if (!isBallMoving)
+        bool isBallMoving = ball.linearVelocity.magnitude > isBallMovingThreshold;
+        if (isBallMoving)
         {
-            if (Input.GetMouseButton(0))
-            {
-                IncreasePower();
-                aimLine.gameObject.SetActive(true);
-            }
-
-            if (Input.GetMouseButtonUp(0))
-            {
-                ShootBall();
-                ResetAim();
-            }
-
-            if (Input.GetMouseButtonUp(1))
-            {
-                ResetAim();
-            }
-        }
-        else
-        {
-            // Hide aim line when ball is moving
+            isAiming = false;
             aimLine.gameObject.SetActive(false);
         }
     }
 
     void LateUpdate()
     {
-        if (Input.GetMouseButton(0) && !isBallMoving)
+        if (isAiming)
         {
             UpdateLineRenderer();
         }
-        
-        // Update camera position smoothly
-        if (cameraHolder != null)
-        {
-            cameraHolder.position = Vector3.Lerp(cameraHolder.position, 
-                transform.position + transform.rotation * cameraOffset, 
-                Time.deltaTime * 10f);
-            cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, 
-                transform.rotation, 
-                Time.deltaTime * 10f);
-        }
     }
 
-    private void UpdateRotation()
+    private void UpdateInputs()
     {
-        xRot += Input.GetAxis("Mouse X") * rotationSpeed;
-        yRot += Input.GetAxis("Mouse Y") * rotationSpeed * 0.5f;
+        // Handle movement and camera rotation using the new input system
+        float mouseX = lookInput.x;
+        float mouseY = lookInput.y;
+        
+        // Apply input sensitivity
+        float adjustedMouseX = mouseX * rotationSpeed * Time.deltaTime * 10f; // Multiplied by 10 to match old input system
+        float adjustedMouseY = mouseY * rotationSpeed * Time.deltaTime * 10f;
+        
+        // WASD / Gamepad movement from moveInput
+        float moveX = moveInput.x;
+        float moveY = moveInput.y;
+        
+        // Combine inputs for rotation
+        xRot += adjustedMouseX;
+        yRot += adjustedMouseY * 0.5f;
 
         aimXRot = xRot;
-        aimYRot += Input.GetAxis("Mouse Y") * rotationSpeed;
+        aimYRot += adjustedMouseY;
 
-        xRot += ((Input.GetKey(KeyCode.A) ? -0.5f : 0f) + (Input.GetKey(KeyCode.D) ? 0.5f : 0f));
-        yRot -= ((Input.GetKey(KeyCode.W) ? 0.25f : 0f) + (Input.GetKey(KeyCode.S) ? -0.25f : 0f));
+        // Apply movement to rotation
+        xRot += moveX * gamepadSensitivity * Time.deltaTime;
+        yRot -= moveY * gamepadSensitivity * Time.deltaTime * 0.5f;
 
-        aimXRot += ((Input.GetKey(KeyCode.A) ? -0.5f : 0f) + (Input.GetKey(KeyCode.D) ? 0.5f : 0f));
-        aimYRot -= ((Input.GetKey(KeyCode.W) ? 0.5f : 0f) + (Input.GetKey(KeyCode.S) ? -0.5f : 0f));
+        aimXRot += moveX * gamepadSensitivity * Time.deltaTime;
+        aimYRot -= moveY * gamepadSensitivity * Time.deltaTime;
 
+        // Clamp angles
         yRot = Mathf.Clamp(yRot, MinPitch * 0.5f, MaxPitch * 0.5f);
         aimYRot = Mathf.Clamp(aimYRot, MinPitch, MaxPitch);
 
+        // Update camera position and rotation
+        if (cameraHolder != null)
+        {
+            cameraHolder.position = Vector3.Lerp(cameraHolder.position, transform.position + transform.rotation * cameraOffset, Time.deltaTime * 10f);
+            cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, transform.rotation, Time.deltaTime * 10f);
+        }
+
         transform.rotation = Quaternion.Euler(yRot, xRot, 0f);
         aimPoint.rotation = Quaternion.Euler(aimYRot, aimXRot, 0f);
+        
+        
+        bool canShoot = ball.linearVelocity.magnitude <= isBallMovingThreshold;
+        
+        // Shooting controls
+        if (canShoot)
+        {
+            if (aimPressed)
+            {
+                isAiming = true;
+                IncreasePower();
+            }
+
+            if (shootReleased && isAiming)
+            {
+                ShootBall();
+                ResetAim();
+                shootReleased = false;
+            }
+
+            // Cancel aiming
+            if (cancelPressed)
+            {
+                ResetAim();
+                cancelPressed = false;
+            }
+        }
     }
 
     private void IncreasePower()
     {
-        currentPower += Time.deltaTime * 20;
+        float powerIncreaseRate = gamepadPowerIncreaseSpeed;
+        currentPower += Time.deltaTime * powerIncreaseRate;
         currentPower = Mathf.Clamp(currentPower, MinPower, MaxPower);
     }
 
@@ -119,7 +186,7 @@ public class ControlPoint : MonoBehaviour
     {
         Vector3 direction = aimPoint.forward;
         
-        // Use the ball's position directly instead of the transform's position
+        // Use the ball's position directly
         Vector3 startPos = ball.position;
         Vector3 endPos = startPos + direction * (currentPower / MaxPower) * MaxAimLineLength;
         
@@ -131,7 +198,14 @@ public class ControlPoint : MonoBehaviour
     {
         Vector3 shotDirection = aimPoint.forward;
         ball.linearVelocity = shotDirection * currentPower;
-        GameHUD.Instance.AddShot();
+        
+        // If GameHUD exists, add a shot
+        if (GameHUD.Instance != null)
+        {
+            GameHUD.Instance.AddShot();
+        }
+        
+        isAiming = false;
         aimLine.gameObject.SetActive(false);
         currentPower = MinPower;
     }
@@ -140,6 +214,7 @@ public class ControlPoint : MonoBehaviour
     {
         aimYRot = yRot;
         currentPower = MinPower;
+        isAiming = false;
         aimLine.gameObject.SetActive(false);
     }
 }
