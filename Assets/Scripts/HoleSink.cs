@@ -50,7 +50,9 @@ public class HoleSink : MonoBehaviour
 
     void RestartGame()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         GameHUD.Instance.ResetGame();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 }
